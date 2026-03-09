@@ -6,16 +6,23 @@
   "devDependencies": {
     "@types/bun": "latest",
     "@types/express": "^5.0.6",
-    "@types/node": "^25.3.5"
+    "@types/node": "^25.3.5",
+    "@types/pg": "^8.18.0",
+    "drizzle-kit": "^0.31.9"
   },
   "peerDependencies": {
     "typescript": "^5.9.3"
   },
   "dependencies": {
-    "express": "^5.2.1"
+    "dotenv": "^17.3.1",
+    "drizzle-orm": "^0.45.1",
+    "express": "^5.2.1",
+    "pg": "^8.20.0"
   },
   "scripts": {
     "start": "bun src/server.ts",
-    "dev": "bun --watch src/server.ts"
+    "dev": "bun --watch src/server.ts",
+    "generate": "drizzle-kit generate",
+    "migrate": "drizzle-kit migrate"
   }
 }
