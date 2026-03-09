@@ -23,6 +23,7 @@
     "start": "bun src/server.ts",
     "dev": "bun --watch src/server.ts",
     "generate": "drizzle-kit generate",
-    "migrate": "drizzle-kit migrate"
+    "migrate": "drizzle-kit migrate",
+    "studio": "drizzle-kit studio"
   }
 }

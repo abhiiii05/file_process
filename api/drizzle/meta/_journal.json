@@ -8,6 +8,13 @@
       "when": 1773046913690,
       "tag": "0000_curved_maverick",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1773073585276,
+      "tag": "0001_minor_tana_nile",
+      "breakpoints": true
     }
   ]
 }
