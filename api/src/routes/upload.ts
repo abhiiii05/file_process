@@ -1,6 +1,6 @@
 import express from 'express';
 import type { Request, Response } from "express";
-import multer from 'multer';
+import multer = require("multer");
 import crypto from 'crypto';
 import fs from 'fs';
 import { db } from '../db';
@@ -11,9 +11,13 @@ const router = express.Router();
 
 const storage = multer.diskStorage({
   destination: 'uploads/',
-  filename: (_, file, cb) => { 
-    cb(null, Date.now() + "-" + file.originalname);
-  }
+  filename: (
+      _req: Request,
+      file: Express.Multer.File,
+      cb: (error: Error | null, filename: string) => void
+    ) => {
+      cb(null, Date.now() + "-" + file.originalname);
+    }
 })
 
 const upload = multer({storage})

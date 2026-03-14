@@ -1,14 +1,12 @@
 import express from "express";
 import { db } from "./db";
+import uploadRoute from "./routes/upload";
 
 import type { Request, Response } from "express";
 const app = express();
 const port: number = 3000;
 
-app.get("/health", (req: Request, res: Response) => {
-  res.send("OK");
-  
-});
+app.use("/api", uploadRoute);
 
 app.listen(port, () => {
   console.log(`Server is running on port ${port}`);

@@ -1,6 +1,8 @@
 {
   "compilerOptions": {
     // Environment setup & latest features
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
     "lib": ["ESNext"],
     "target": "ESNext",
     "module": "Preserve",
