@@ -1,5 +1,5 @@
 import express from "express";
-import { db } from "./db";
+import { db } from "../../shared/db";
 import uploadRoute from "./routes/upload";
 
 import type { Request, Response } from "express";

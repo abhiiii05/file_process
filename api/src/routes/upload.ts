@@ -3,8 +3,8 @@ import type { Request, Response } from "express";
 import multer = require("multer");
 import crypto from 'crypto';
 import fs from 'fs';
-import { db } from '../db';
-import { file, jobs } from '../db/schema';
+import { db } from '../../../shared/db';
+import { file, jobs } from '../../../shared/db/schema';
 
 
 const router = express.Router();
