@@ -5,7 +5,7 @@ import fs from "fs/promises";
 import "dotenv/config";
 import path from "path";
 
-// console.log("DATABASE_URL:", process.env.DATABASE_URL);
+console.log("DATABASE_URL:", process.env.DATABASE_URL);
 
 async function processJobs() {
   console.log("Worker Started ...");
