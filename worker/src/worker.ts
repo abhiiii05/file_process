@@ -1,6 +1,6 @@
 import { db } from "../../shared/db";
 import { file, jobs } from "../../shared/db/schema";
-import { eq } from "drizzle-orm";
+import { eq, asc } from "drizzle-orm";
 import fs from "fs/promises";
 import "dotenv/config";
 import path from "path";
@@ -13,25 +13,44 @@ async function processJobs() {
   while (true) {
     try {
       // console.log("Before DB query");
-      const pendingJob = await db
-        .select()
-        .from(jobs)
-        .where(eq(jobs.status, "pending"))
-        .limit(1);
+      const pendingJob = await db.transaction(async (tx) => {
+        const nextJob = await tx
+          .select()
+          .from(jobs)
+          .where(eq(jobs.status, "pending"))
+          .orderBy(asc(jobs.createdAt))
+          .limit(1)
+          .for('update',{skipLocked: true})
+        
+        if (nextJob.length === 0) return null;
+        
+        const job = nextJob[0];
+        await tx
+           .update(jobs)
+           .set({ status: 'processing', startedAt: new Date() })
+           .where(eq(jobs.id, job.id));
+       
+         return job;
+      
+      })
+        // .select()
+        // .from(jobs)
+        // .where(eq(jobs.status, "pending"))
+        // .limit(1);
       // console.log("After DB query", pendingJob);
 
-      if (pendingJob.length === 0) {
+      if (!pendingJob) {
         await new Promise((r) => setTimeout(r, 3000));
         continue;
       }
 
-      const job = pendingJob[0];
-      console.log("Job under process  : ", job.id);
+      const job = pendingJob;
+      // console.log("Job under process  : ", job.id);
 
-      await db
-        .update(jobs)
-        .set({ status: "processing" })
-        .where(eq(jobs.id, job.id));
+      // await db
+      //   .update(jobs)
+      //   .set({ status: "processing" })
+      //   .where(eq(jobs.id, job.id));
 
       const fileData = await db
         .select()
