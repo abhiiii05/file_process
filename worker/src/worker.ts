@@ -1,5 +1,5 @@
 import { db } from "../../shared/db";
-import { file, jobs } from "../../shared/db/schema";
+import { file, jobs, processing } from "../../shared/db/schema";
 import { eq, asc, sql, lt, or, and } from "drizzle-orm";
 import fs from "fs/promises";
 import "dotenv/config";
@@ -79,9 +79,68 @@ async function processJobs() {
       try {
         const data = await fs.readFile(filepath, "utf-8");
         console.log("File content: ", data);
+        
+        const words = data.trim().split(/\s+/);
+        const sentences = data.trim().split(/[.!?]\s*|\n/).filter(Boolean);
+        const wordCount = words.length;
+        const sentenceCount = sentences.length;
+        
+        const cleanWords = data
+          .toLowerCase()
+          .match(/\w+/g) || [];
+        
+        const counts: Record<string, number> = {};
+        
+        cleanWords.forEach((word) => {
+          counts[word] = (counts[word] || 0) + 1;
+        });
+        
+        const topWords = Object.entries(counts)
+          .sort((a, b) => b[1] - a[1])
+          .slice(0, 5)
+          .map(([word, count]) => ({ word, count }));
+        
+        const estimatedReadingTime = Math.ceil(wordCount / 200);
+        
+        
+        // let frequencyMap = sentences.map(sentence => {
+        //   let word = sentence.toLocaleLowerCase().match(/\w+/g) || [];
+        //   let counts : Record<string, number> = {};
+        //   word.forEach(fword => {
+        //     counts[fword] = (counts[fword] || 0) + 1;
+        //   });
+        //   let top3 = Object.entries(counts)
+        //     .sort((a, b) => b[1] - a[1])
+        //     .slice(0, 3)
+        //     .map(item => ({ fword: item[0], count: item[1] }));
+        
+        //   return {
+        //           text: sentence.trim(),
+        //           topWords: top3
+        //       };
+        // });
+        
+        // const estimatedReadingTime = Math.ceil(wordCount / 200)
+        
+        
+        
+        
+        
+        await db
+          .insert(processing)
+          .values({
+            jobId: job.id,
+            fileId: job.fileId,
+            wordCount : wordCount,
+            sentenceCount : sentenceCount,
+            topWords : topWords,
+            estimatedReadingTime: estimatedReadingTime,
+            processedAt: new Date()
+          });
+        
         await db
           .update(jobs)
-          .set({ status: "completed", completedAt: new Date})
+          .set({ status: "completed", completedAt: new Date()})
           .where(eq(jobs.id, job.id));
       } catch (error) {
         const [{ newretryCount }] = await db
