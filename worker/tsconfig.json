@@ -1,40 +1,21 @@
 {
   "compilerOptions": {
-    // Environment setup & latest features
     "esModuleInterop": true,
     "allowSyntheticDefaultImports": true,
     "lib": ["ESNext"],
     "target": "ESNext",
     "module": "Preserve",
     "moduleDetection": "force",
-    "jsx": "react-jsx",
-    "allowJs": true,
-
-    // Bundler mode
     "moduleResolution": "bundler",
-    "allowImportingTsExtensions": true,
-    "verbatimModuleSyntax": true,
     "noEmit": true,
-    "types": ["node"],
-
-    // Best practices
     "strict": true,
     "skipLibCheck": true,
     "baseUrl": ".",
     "paths": {
       "drizzle-orm": ["../node_modules/.bun/drizzle-orm@0.45.2+f440a6a6ab898a41/node_modules/drizzle-orm"],
       "drizzle-orm/*": ["../node_modules/.bun/drizzle-orm@0.45.2+f440a6a6ab898a41/node_modules/drizzle-orm/*"]
-    },
-    "noFallthroughCasesInSwitch": true,
-    "noUncheckedIndexedAccess": true,
-    "noImplicitOverride": true,
-
-    // Some stricter flags (disabled by default)
-    "noUnusedLocals": false,
-    "noUnusedParameters": false,
-    "noPropertyAccessFromIndexSignature": false,
+    }
   },
-
   "include": ["src", "../shared"],
-  "exclude": ["node_modules"],
+  "exclude": ["node_modules"]
 }

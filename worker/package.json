@@ -1,0 +1,20 @@
+{
+  "name": "worker",
+  "module": "src/worker.ts",
+  "type": "module",
+  "private": true,
+  "dependencies": {
+    "dotenv": "^17.3.1",
+    "drizzle-orm": "^0.45.1",
+    "ioredis": "^5.10.1",
+    "pg": "^8.20.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "@types/pg": "^8.18.0"
+  },
+  "scripts": {
+    "start": "bun src/worker.ts",
+    "dev": "bun --watch src/worker.ts"
+  }
+}

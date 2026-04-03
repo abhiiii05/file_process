@@ -1,0 +1,21 @@
+{
+  "compilerOptions": {
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
+    "lib": ["ESNext"],
+    "target": "ESNext",
+    "module": "Preserve",
+    "moduleDetection": "force",
+    "moduleResolution": "bundler",
+    "noEmit": true,
+    "strict": false,
+    "skipLibCheck": true,
+    "baseUrl": ".",
+    "paths": {
+      "drizzle-orm": ["../node_modules/.bun/drizzle-orm@0.45.2+f440a6a6ab898a41/node_modules/drizzle-orm"],
+      "drizzle-orm/*": ["../node_modules/.bun/drizzle-orm@0.45.2+f440a6a6ab898a41/node_modules/drizzle-orm/*"]
+    }
+  },
+  "include": ["**/*.ts"],
+  "exclude": ["node_modules"]
+}
