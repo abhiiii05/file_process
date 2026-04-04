@@ -13,7 +13,9 @@
     "baseUrl": ".",
     "paths": {
       "drizzle-orm": ["../node_modules/.bun/drizzle-orm@0.45.2+f440a6a6ab898a41/node_modules/drizzle-orm"],
-      "drizzle-orm/*": ["../node_modules/.bun/drizzle-orm@0.45.2+f440a6a6ab898a41/node_modules/drizzle-orm/*"]
+      "drizzle-orm/*": ["../node_modules/.bun/drizzle-orm@0.45.2+f440a6a6ab898a41/node_modules/drizzle-orm/*"],
+      "ioredis": ["../node_modules/.bun/ioredis@5.10.1/node_modules/ioredis"],
+      "ioredis/*": ["../node_modules/.bun/ioredis@5.10.1/node_modules/ioredis/*"]
     }
   },
   "include": ["**/*.ts"],

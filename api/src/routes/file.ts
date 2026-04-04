@@ -1,7 +1,8 @@
 import express from 'express';
 import type { Request, Response } from "express";
 import { db } from '../../../shared/db';
-import { processing , jobs} from '../../../shared/db/schema'
+import { processing, jobs } from '../../../shared/db/schema'
+import redis from '../../../shared/redis';
 import { eq } from "drizzle-orm";
 
 const router = express.Router();
@@ -9,6 +10,7 @@ const router = express.Router();
 router.get('/files/:id/result', async (req: Request, res: Response) => {
   try {
     const fileId = req.params.id;
+    const cachekey = `file:${fileId}`;
     
     if(!fileId) {
       return res.status(400).json({ error: 'File ID is required' });
@@ -16,7 +18,14 @@ router.get('/files/:id/result', async (req: Request, res: Response) => {
     
     if (Array.isArray(fileId)) {
          return res.status(400).json({ error: 'Invalid File ID format' });
-       }
+    }
+    
+    const cached = await redis.get(cachekey);
+    
+    if (cached) {
+      console.log("Cache Hit")
+      return res.json(JSON.parse(cached));
+    }
     
     const result = await db.select()
       .from(processing)
@@ -24,10 +33,12 @@ router.get('/files/:id/result', async (req: Request, res: Response) => {
       .where(eq(processing.fileId, fileId));
     
     if (result.length > 0) {
-      return res.json({
-        status: "completed",
-        data: result[0]
-      });
+      const response = { 
+         status : "completed",
+         data: result[0]
+      }
+      await redis.set(cachekey, JSON.stringify(response), 'EX', 60);
+      return res.json(response);
     }
     
     const job = await db.select()
