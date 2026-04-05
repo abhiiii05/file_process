@@ -4,6 +4,7 @@ import { eq, asc, sql, lt, or, and } from "drizzle-orm";
 import fs from "fs/promises";
 import "dotenv/config";
 import path from "path";
+import redis from "../../shared/redis"
 
 console.log("DATABASE_URL:", process.env.DATABASE_URL);
 
@@ -142,6 +143,8 @@ async function processJobs() {
           .update(jobs)
           .set({ status: "completed", completedAt: new Date()})
           .where(eq(jobs.id, job.id));
+      
+         await redis.del(`file:${job.fileId}`); // test this 
       } catch (error) {
         const [{ newretryCount }] = await db
           .update(jobs)
