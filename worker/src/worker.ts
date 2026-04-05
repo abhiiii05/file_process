@@ -5,10 +5,24 @@ import fs from "fs/promises";
 import "dotenv/config";
 import path from "path";
 import redis from "../../shared/redis"
+import { Worker } from "bullmq";
 
 console.log("DATABASE_URL:", process.env.DATABASE_URL);
 
 const MAX_RETRIES = 3;
+
+
+const worker = new Worker("file_processing", async (job) => {
+  const { jobId, fileId } = job.data;
+  console.log("job recieved : ", jobId, '\n' ,fileId)
+},
+  {
+    connection: {
+          host: "127.0.0.1",
+          port: 6379,
+          maxRetriesPerRequest: null, 
+        }
+});
 
 
 async function processJobs() {
@@ -193,3 +207,4 @@ async function processJobs() {
 }
 
 processJobs();
+console.log("Worker Started ...")
