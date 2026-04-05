@@ -5,9 +5,11 @@ import crypto from 'crypto';
 import fs from 'fs';
 import { db } from '../../../shared/db';
 import { file, jobs } from '../../../shared/db/schema';
+import queue from '../../../shared/queue';
 
 
 const router = express.Router();
+
 
 const storage = multer.diskStorage({
   destination: 'uploads/',
@@ -38,15 +40,19 @@ router.post('/upload', upload.single('file'),  async (req: Request, res: Respons
       checksum: hash,
     }).returning();
     
+     
     const insertedFile = newFile[0];
     
     if (!insertedFile) {
       throw new Error("File insert failed");
     }
     
-    await db.insert(jobs).values({
+    const [insertedJob] =await db.insert(jobs).values({
       fileId: insertedFile.id,
-    });
+    }).returning({jobId: jobs.id});
+    
+    await queue.add('file_processing', { jobId : insertedJob?.jobId, fileId: insertedFile.id });
+    console.log("Job added to queue")
     
     res.json({
           message: "File uploaded",
