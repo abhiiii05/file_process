@@ -1,5 +1,8 @@
-  {
+{
     "name": "file-process",
     "private": true,
-    "workspaces": ["api", "worker"]
-  }
+    "workspaces": ["api", "worker"],
+    "dependencies": {
+        "bullmq": "^5.73.0"
+    }
+}

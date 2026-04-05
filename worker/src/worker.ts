@@ -144,7 +144,7 @@ async function processJobs() {
           .set({ status: "completed", completedAt: new Date()})
           .where(eq(jobs.id, job.id));
       
-         await redis.del(`file:${job.fileId}`); // test this 
+         await redis.del(`file:${job.fileId}`); 
       } catch (error) {
         const [{ newretryCount }] = await db
           .update(jobs)
