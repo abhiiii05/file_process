@@ -77,7 +77,19 @@ const worker = new Worker("file_processing", async (job) => {
   
     const estimatedReadingTime = Math.ceil(wordCount / 200)
     
-    console.log(wordCount,'\n',sentenceCount, '\n', estimatedReadingTime, '\n', topWords)
+    console.log(wordCount, '\n', sentenceCount, '\n', estimatedReadingTime, '\n', topWords)
+    
+    await db
+            .insert(processing)
+            .values({
+              jobId: jobId,
+              fileId: fileId,
+              wordCount : wordCount,
+              sentenceCount : sentenceCount,
+              topWords : topWords,
+              estimatedReadingTime: estimatedReadingTime,
+              processedAt: new Date()
+            });
 
   }
   catch (error) {
