@@ -16,11 +16,71 @@ const worker = new Worker("file_processing", async (job) => {
   const { jobId, fileId } = job.data;
   console.log("job recieved : ", jobId, '\n', fileId);
   try {
-    const result = await db.update(jobs)
+    const updateProcessing = await db.update(jobs)
       .set({ status: "processing", startedAt: new Date() })
       .where(eq(jobs.id, jobId));
-    console.log("Rows affected:", result.rowCount); 
-  } catch (error) {
+    console.log("Rows affected:", updateProcessing.rowCount);
+
+    
+    const fileData = await db
+          .select()
+          .from(file)
+          .where(eq(file.id, fileId));
+    if (fileData.length === 0) {
+          throw new Error(`File not found in DB`);
+        }
+    const storagePath = fileData[0].storagePath;
+    const filepath = path.resolve(process.cwd(), "api", storagePath);
+    const data = await fs.readFile(filepath, "utf-8");
+    console.log("Store path: ", storagePath);
+    console.log("file Path : " , filepath)
+    console.log("File content: ", fileData);
+    console.log(data)
+    const words = data.trim().split(/\s+/);
+    const sentences = data.trim().split(/[.!?]\s*|\n/).filter(Boolean);
+    const wordCount = words.length;
+    const sentenceCount = sentences.length;
+  
+    const cleanWords = data
+      .toLowerCase()
+      .match(/\w+/g) || [];
+  
+    const counts: Record<string, number> = {};
+  
+    cleanWords.forEach((word) => {
+      counts[word] = (counts[word] || 0) + 1;
+    });
+  
+    const topWords = Object.entries(counts)
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 5)
+      .map(([word, count]) => ({ word, count }));
+  
+  
+  
+    let frequencyMap = sentences.map(sentence => {
+      let word = sentence.toLocaleLowerCase().match(/\w+/g) || [];
+      let counts : Record<string, number> = {};
+      word.forEach(fword => {
+        counts[fword] = (counts[fword] || 0) + 1;
+      });
+      let top3 = Object.entries(counts)
+        .sort((a, b) => b[1] - a[1])
+        .slice(0, 3)
+        .map(item => ({ fword: item[0], count: item[1] }));
+        
+      return {
+                    text: sentence.trim(),
+                    topWords: top3
+                };
+          });
+  
+    const estimatedReadingTime = Math.ceil(wordCount / 200)
+    
+    console.log(wordCount,'\n',sentenceCount, '\n', estimatedReadingTime, '\n', topWords)
+
+  }
+  catch (error) {
     console.error("Database Update Failed:", error);
   }
 },
