@@ -90,10 +90,16 @@ const worker = new Worker("file_processing", async (job) => {
               estimatedReadingTime: estimatedReadingTime,
               processedAt: new Date()
             });
-
+    
+    
+    await db
+            .update(jobs)
+            .set({ status: "completed", completedAt: new Date()})
+            .where(eq(jobs.id, jobId));
   }
   catch (error) {
     console.error("Database Update Failed:", error);
+    throw error;
   }
 },
   {

@@ -5,6 +5,6 @@ const queue = new Queue('file_processing', {
     host: 'localhost',
     port: 6379,
   }
-});
+},);
 
 export default queue;

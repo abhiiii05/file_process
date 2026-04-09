@@ -50,8 +50,8 @@ router.post('/upload', upload.single('file'),  async (req: Request, res: Respons
     const [insertedJob] =await db.insert(jobs).values({
       fileId: insertedFile.id,
     }).returning({jobId: jobs.id});
-    
-    await queue.add('file_processing', { jobId : insertedJob?.jobId, fileId: insertedFile.id });
+    ;
+    await queue.add('file_processing', { jobId : insertedJob?.jobId, fileId: insertedFile.id },{attempts:3});
     console.log("Job added to queue")
     
     res.json({
