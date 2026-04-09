@@ -21,7 +21,7 @@ const worker = new Worker("file_processing", async (job) => {
       .where(eq(jobs.id, jobId));
     console.log("Rows affected:", updateProcessing.rowCount);
 
-    
+
     const fileData = await db
           .select()
           .from(file)
@@ -32,6 +32,7 @@ const worker = new Worker("file_processing", async (job) => {
     const storagePath = fileData[0].storagePath;
     const filepath = path.resolve(process.cwd(), "api", storagePath);
     const data = await fs.readFile(filepath, "utf-8");
+    throw new Error("test");
     console.log("Store path: ", storagePath);
     console.log("file Path : " , filepath)
     console.log("File content: ", fileData);
@@ -40,24 +41,24 @@ const worker = new Worker("file_processing", async (job) => {
     const sentences = data.trim().split(/[.!?]\s*|\n/).filter(Boolean);
     const wordCount = words.length;
     const sentenceCount = sentences.length;
-  
+
     const cleanWords = data
       .toLowerCase()
       .match(/\w+/g) || [];
-  
+
     const counts: Record<string, number> = {};
-  
+
     cleanWords.forEach((word) => {
       counts[word] = (counts[word] || 0) + 1;
     });
-  
+
     const topWords = Object.entries(counts)
       .sort((a, b) => b[1] - a[1])
       .slice(0, 5)
       .map(([word, count]) => ({ word, count }));
-  
-  
-  
+
+
+
     let frequencyMap = sentences.map(sentence => {
       let word = sentence.toLocaleLowerCase().match(/\w+/g) || [];
       let counts : Record<string, number> = {};
@@ -68,17 +69,17 @@ const worker = new Worker("file_processing", async (job) => {
         .sort((a, b) => b[1] - a[1])
         .slice(0, 3)
         .map(item => ({ fword: item[0], count: item[1] }));
-        
+
       return {
                     text: sentence.trim(),
                     topWords: top3
                 };
           });
-  
+
     const estimatedReadingTime = Math.ceil(wordCount / 200)
-    
+
     console.log(wordCount, '\n', sentenceCount, '\n', estimatedReadingTime, '\n', topWords)
-    
+
     await db
             .insert(processing)
             .values({
@@ -90,8 +91,8 @@ const worker = new Worker("file_processing", async (job) => {
               estimatedReadingTime: estimatedReadingTime,
               processedAt: new Date()
             });
-    
-    
+
+
     await db
             .update(jobs)
             .set({ status: "completed", completedAt: new Date()})
@@ -108,6 +109,22 @@ const worker = new Worker("file_processing", async (job) => {
           port: 6379,
           maxRetriesPerRequest: null,
         }
+  });
+
+
+worker.on("failed", async (job, error) => {
+  const jobId = job?.data?.jobId;
+  const retryCount = job?.attemptsMade || 0;
+    await db.update(jobs)
+      .set({
+            status: retryCount >= MAX_RETRIES ? "failed" : "pending",
+            completedAt: retryCount >= MAX_RETRIES ? new Date() : null,
+            retryCount : retryCount,
+            errorMessage: error.message,
+          })
+          .where(eq(jobs.id, jobId));
+
+
 });
 
 
