@@ -89,7 +89,16 @@ const worker = new Worker("file_processing", async (job) => {
               topWords : topWords,
               estimatedReadingTime: estimatedReadingTime,
               processedAt: new Date()
-            });
+            }).onConflictDoUpdate({
+                target: processing.jobId,
+                set: {
+                  wordCount,
+                  sentenceCount,
+                  topWords,
+                  estimatedReadingTime,
+                  processedAt: new Date(),
+                },
+              });
 
 
     await db

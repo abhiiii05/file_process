@@ -47,7 +47,7 @@ export const jobs = pgTable("jobs", {
 
 export const processing = pgTable("processing", {
   id: uuid("id").primaryKey().defaultRandom(),
-  jobId: uuid("job_id").references(() => jobs.id, { onDelete: "cascade" }).notNull(),
+  jobId: uuid("job_id").unique().references(() => jobs.id, { onDelete: "cascade" }).notNull(),
   fileId: uuid("file_id").references(() => file.id, { onDelete: "cascade" }).notNull(),
   wordCount: integer("word_count").notNull(),
   sentenceCount: integer("sentence_count").notNull(),
