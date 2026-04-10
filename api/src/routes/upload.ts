@@ -6,6 +6,7 @@ import fs from 'fs';
 import { db } from '../../../shared/db';
 import { file, jobs } from '../../../shared/db/schema';
 import queue from '../../../shared/queue';
+import { Backoffs } from 'bullmq';
 
 
 const router = express.Router();
@@ -51,7 +52,7 @@ router.post('/upload', upload.single('file'),  async (req: Request, res: Respons
       fileId: insertedFile.id,
     }).returning({jobId: jobs.id});
     ;
-    await queue.add('file_processing', { jobId : insertedJob?.jobId, fileId: insertedFile.id },{attempts:3});
+    await queue.add('file_processing', { jobId: insertedJob?.jobId, fileId: insertedFile.id }, { attempts: 3, backoff: { type: 'exponential', delay: 3000 } });
     console.log("Job added to queue")
     
     res.json({

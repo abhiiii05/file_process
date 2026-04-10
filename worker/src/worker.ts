@@ -31,12 +31,11 @@ const worker = new Worker("file_processing", async (job) => {
         }
     const storagePath = fileData[0].storagePath;
     const filepath = path.resolve(process.cwd(), "api", storagePath);
-    const data = await fs.readFile(filepath, "utf-8");
-    throw new Error("test");
-    console.log("Store path: ", storagePath);
+    const data = await fs.readFile(filepath, "utf-8");    console.log("Store path: ", storagePath);
     console.log("file Path : " , filepath)
     console.log("File content: ", fileData);
     console.log(data)
+    // throw new Error("test");
     const words = data.trim().split(/\s+/);
     const sentences = data.trim().split(/[.!?]\s*|\n/).filter(Boolean);
     const wordCount = words.length;
@@ -115,6 +114,15 @@ const worker = new Worker("file_processing", async (job) => {
 worker.on("failed", async (job, error) => {
   const jobId = job?.data?.jobId;
   const retryCount = job?.attemptsMade || 0;
+
+  console.log(`Job ${jobId} failed | attempt ${retryCount}/${MAX_RETRIES} | error: ${error.message}`);
+
+   if (retryCount < MAX_RETRIES) {
+     console.log(`Retrying in ~${2 ** retryCount * 2}s...`);
+   } else {
+     console.log(`Job ${jobId} permanently failed after ${MAX_RETRIES} attempts`);
+   }
+
     await db.update(jobs)
       .set({
             status: retryCount >= MAX_RETRIES ? "failed" : "pending",
