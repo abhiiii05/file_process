@@ -10,11 +10,12 @@ const router = express.Router();
 router.get('/files/:id/result', async (req: Request, res: Response) => {
   try {
     const fileId = req.params.id;
-    const cachekey = `file:${fileId}`;
     
     if(!fileId) {
       return res.status(400).json({ error: 'File ID is required' });
     }
+    
+    const cachekey = `file:${fileId}`;
     
     if (Array.isArray(fileId)) {
          return res.status(400).json({ error: 'Invalid File ID format' });
@@ -29,13 +30,18 @@ router.get('/files/:id/result', async (req: Request, res: Response) => {
     
     const result = await db.select()
       .from(processing)
-      //fix delteing the node modules and bun lock then reinstall
       .where(eq(processing.fileId, fileId));
     
     if (result.length > 0) {
       const response = { 
-         status : "completed",
-         data: result[0]
+        status: "completed",
+        data: {
+          wordCount: result[0]?.wordCount,
+          sentenceCount: result[0]?.sentenceCount,
+          topWords: result[0]?.topWords,
+          estimatedReadingTime: result[0]?.estimatedReadingTime,
+          processedAt: result[0]?.processedAt
+        }
       }
       await redis.set(cachekey, JSON.stringify(response), 'EX', 60);
       return res.json(response);
@@ -51,10 +57,20 @@ router.get('/files/:id/result', async (req: Request, res: Response) => {
       if(jobData.status === "failed") {
         return res.json({
           status: "failed",
-          error: jobData.errorMessage
-        });
-        
+          error: jobData.errorMessage,
+          retryCount : jobData.retryCount
+        }); 
       }
+      
+      if (jobData.status === "pending") {
+        return res.json({
+          status : "retrying",
+          // error: jobData.errorMessage,
+          retryCount : jobData.retryCount
+        })
+      }
+        
+      
       return res.json({
               status: jobData.status
             });
